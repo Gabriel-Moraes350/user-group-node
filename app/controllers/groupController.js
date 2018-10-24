@@ -68,7 +68,7 @@ exports.addUser = function(req, res, next)
 exports.removeUserFromGroup = function(req, res, next)
 {
     const id = req.params.id;
-    services.removeUserFromGroup(id, req.body)
+    services.removeUserFromGroup(id, req.query)
     .then(save => res.json(response.success(save)))
     .catch(e => next(e));
 }
