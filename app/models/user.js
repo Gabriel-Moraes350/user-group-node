@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 class User{
     constructor(){
         this.id;
@@ -26,7 +27,7 @@ class User{
     {
         this.name = data.name;
         this.email = data.email;
-        this.password = data.password;
+        this.password = bcrypt.hashSync(data.password, 2);
     }
 
 }

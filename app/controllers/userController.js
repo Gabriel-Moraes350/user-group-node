@@ -1,35 +1,34 @@
-var UserServices = require('../services/userServices');
-const response = require('../services/response.js');
+var UserRepository = require('../services/user/UserRepository');
+const response = require('../services/http/response.js');
 const { check, validationResult } = require('express-validator/check');
-console.log(UserServices);
-const services = new UserServices();
+const services = new UserRepository();
 
-exports.index = function(req, res) {
+exports.index = function(req, res, next) {
     services.list().then(users => {
         res.json(response.success(users));
-    }).catch(e => {res.status(500).json(response.error(e))});
+    }).catch(e => next(e));
 
 };
 
-exports.listGroups = function(req, res){
+exports.listGroups = function(req, res, next){
     const id = req.params.id;
     services.listGroups(id)
     .then(groups => res.json(response.success(groups)))
-    .catch(e => {res.status(500).json(response.error(e))});
+    .catch(e => next(e));
 }
 
 
-exports.create = function(req, res) {
+exports.create = function(req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json(response.error(errors.array()));
     }
     services.create(req.body).then(user => {
         res.json(response.success(user));
-    }).catch(e => {res.status(500).json(response.error(e))});
+    }).catch(e => next(e));
 }
 
-exports.update = function(req, res) {
+exports.update = function(req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json(response.error(errors.array()));
@@ -38,19 +37,19 @@ exports.update = function(req, res) {
     const id = req.params.id;
     services.update(id, req.body).then(user => {
         res.json(response.success(user));
-    }).catch(e => {res.status(500).json(response.error(e))});
+    }).catch(e => next(e));
 }
 
-exports.view = function(req, res) {
+exports.view = function(req, res, next) {
     const id = req.params.id;
     services.getById(id)
     .then(user => res.json(response.success(user)))
-    .catch(e => res.status(500).json(response.error(e)));
+    .catch(e => next(e));
 }
 
-exports.delete = function(req, res) {
+exports.delete = function(req, res, next) {
     const id = req.params.id;
     services.delete(id)
     .then(user => res.json(response.success(user)))
-    .catch(e => res.status(500).json(response.error(e)));
+    .catch(e => next(e));
 }

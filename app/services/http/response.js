@@ -6,11 +6,12 @@ exports.success = (data) => {
     }
 }
 
-exports.error = (errors) => {
+exports.error = (data) => {
     return {
         'success': false,
         'date': new Date(),
-        'errors':errors,
-        'data':''
+        'error': data.error || data || '',
+        'data':'',
+        'message': data.message || ''
     }
 }

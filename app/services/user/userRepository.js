@@ -1,8 +1,11 @@
-const conn = require('../database/mysql.js');
-const User = require('../models/user');
-const Group = require('../models/group');
+const conn = require('../../database/mysql.js');
+const User = require('../../models/user');
+var groupServices = require('../group/groupServices.js');
+const UserServices = require('./userServices.js');
 
-class UserServices {
+groupServices = new groupServices();
+
+class UserRepository {
 
     canCreateGroup()
     {
@@ -18,8 +21,8 @@ class UserServices {
         return new Promise((res, rej) => {
             conn.query("SELECT * FROM users WHERE deleted_at IS NULL ORDER BY id DESC", (err, rows) => {
                 if(err) rej(err);
-                
-                res(this.mapUsers(rows));
+                let services = new UserServices();
+                res(services.mapUsers(rows));
             }); 
         });
     }
@@ -35,7 +38,7 @@ class UserServices {
                 try{
                     res({id : rows.insertId});
                 }catch(e){
-                    rej(e);  
+                    rej({error: e, message:'Error create User'});  
                 }
             }); 
         });
@@ -51,9 +54,11 @@ class UserServices {
                 if(err) rej(err);
 
                 try{
-                    res({userId : id});
+                    if(rows.affectedRows > 0)
+                        res({userId : id});
+                    rej({status: 404, error:id, message:'User not exists'});
                 }catch(e){
-                    rej(e);  
+                    rej({error:e, message:'Error on update user'});  
                 }
             }); 
         });
@@ -82,23 +87,11 @@ class UserServices {
                 if(err) rej(err);
                 if(rows.affectedRows > 0)
                     res({userId: id});
-                rej({message: 'Not found'});
+                rej({message: 'Not found', status:404, error:id});
             });
         })
     }
 
-
-    mapUsers(rows)
-    {
-        let users = [];
-        rows.map(function(row) {
-            let usr = new User();
-            usr.insertData(row);
-            users.push(usr);
-        });
-
-        return users;
-    }
 
     listGroups(id)
     {
@@ -107,17 +100,11 @@ class UserServices {
             = user_groups.group_id WHERE user_id = ?`, 
             id, (err, rows) => {
                 if(err) rej(err);
-                let groups = [];
-                rows.map(function(row) {
-                    let grp = new Group();
-                    grp.insertData(row);
-                    groups.push(grp);
-                });
-                res({groups: groups});
+                res({groups: groupServices.mapGroups(rows)});
             });
-        }catch(e){console.log(e)}
+        }catch(e){rej({error: e, message:'Error list groups'})}
         })
     }
 }
 
-module.exports = UserServices;
+module.exports = UserRepository;

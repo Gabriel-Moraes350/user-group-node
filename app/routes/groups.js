@@ -12,7 +12,7 @@ router.get('/', groupController.index);
 //criar
 router.post('/', [
     check('name').isLength({min:5}),
-    check('userId').isInt()
+    check('userId').exists().isInt()
   ], groupController.create);
 
   //alterar
